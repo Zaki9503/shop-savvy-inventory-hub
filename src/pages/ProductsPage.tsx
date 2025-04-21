@@ -2,17 +2,23 @@
 import React, { useState } from "react";
 import { useData } from "@/lib/data-context";
 import { useAuth } from "@/lib/auth-context";
-import { Package, Plus, Search } from "lucide-react";
+import { Package, Plus, Search, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Product } from "@/lib/types";
+import ProductDialog from "@/components/products/ProductDialog";
+import { useToast } from "@/hooks/use-toast";
 
 const ProductsPage: React.FC = () => {
-  const { products, inventory } = useData();
+  const { products, addProduct, updateProduct, deleteProduct, inventory } = useData();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | undefined>();
   
   // For shop managers/staff, show only products in their shop
   const shopId = user?.shopId;
@@ -26,7 +32,6 @@ const ProductsPage: React.FC = () => {
     )
     .sort((a, b) => a.name.localeCompare(b.name));
   
-  // Get stock level for a product at user's shop
   const getStockLevel = (productId: string) => {
     if (!shopId) return { quantity: 0, minLevel: 0 };
     
@@ -39,11 +44,41 @@ const ProductsPage: React.FC = () => {
       : { quantity: 0, minLevel: 0 };
   };
   
-  // Determine stock status
   const getStockStatus = (quantity: number, minLevel: number) => {
     if (quantity === 0) return { label: "Out of Stock", variant: "destructive" };
     if (quantity <= minLevel) return { label: "Low Stock", variant: "warning" };
     return { label: "In Stock", variant: "default" };
+  };
+
+  const handleAddProduct = (data: Partial<Product>) => {
+    const newProduct = addProduct({ ...data, isActive: true } as Product);
+    toast({
+      title: "Success",
+      description: "Product added successfully!",
+    });
+    setDialogOpen(false);
+  };
+
+  const handleEditProduct = (data: Partial<Product>) => {
+    if (editingProduct) {
+      updateProduct(editingProduct.id, data);
+      toast({
+        title: "Success",
+        description: "Product updated successfully!",
+      });
+      setDialogOpen(false);
+      setEditingProduct(undefined);
+    }
+  };
+
+  const handleDeleteProduct = (productId: string) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      deleteProduct(productId);
+      toast({
+        title: "Success",
+        description: "Product deleted successfully!",
+      });
+    }
   };
 
   return (
@@ -54,7 +89,13 @@ const ProductsPage: React.FC = () => {
           <p className="text-gray-500">Manage your product inventory</p>
         </div>
         
-        <Button className="flex items-center gap-2">
+        <Button 
+          className="flex items-center gap-2"
+          onClick={() => {
+            setEditingProduct(undefined);
+            setDialogOpen(true);
+          }}
+        >
           <Plus className="h-4 w-4" />
           <span>Add Product</span>
         </Button>
@@ -71,22 +112,6 @@ const ProductsPage: React.FC = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-            </div>
-            
-            <div className="flex gap-2 w-full sm:w-auto">
-              <select className="h-9 rounded-md border border-input px-3 py-1 text-sm">
-                <option value="">All Categories</option>
-                <option value="Dairy">Dairy</option>
-                <option value="Bakery">Bakery</option>
-                <option value="Produce">Produce</option>
-                <option value="Beverages">Beverages</option>
-              </select>
-              
-              <select className="h-9 rounded-md border border-input px-3 py-1 text-sm">
-                <option value="">All Statuses</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
             </div>
           </div>
           
@@ -106,7 +131,7 @@ const ProductsPage: React.FC = () => {
               <TableBody>
                 {filteredProducts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={shopId ? 6 : 5} className="h-24 text-center">
+                    <TableCell colSpan={shopId ? 7 : 6} className="h-24 text-center">
                       No products found.
                     </TableCell>
                   </TableRow>
@@ -120,7 +145,15 @@ const ProductsPage: React.FC = () => {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-md bg-gray-100 p-2">
-                              <Package className="h-full w-full text-gray-500" />
+                              {product.image ? (
+                                <img 
+                                  src={product.image} 
+                                  alt={product.name}
+                                  className="h-full w-full object-cover rounded-md"
+                                />
+                              ) : (
+                                <Package className="h-full w-full text-gray-500" />
+                              )}
                             </div>
                             <div>
                               <p className="font-medium">{product.name}</p>
@@ -144,33 +177,32 @@ const ProductsPage: React.FC = () => {
                         )}
                         
                         <TableCell>
-                          {shopId ? (
-                            <Badge 
-                              variant={
-                                stockStatus.variant === "warning" 
-                                  ? "outline" 
-                                  : stockStatus.variant === "destructive" 
-                                    ? "destructive" 
-                                    : "default"
-                              }
-                              className={
-                                stockStatus.variant === "warning" 
-                                  ? "border-amber-500 text-amber-700 bg-amber-50" 
-                                  : undefined
-                              }
-                            >
-                              {stockStatus.label}
-                            </Badge>
-                          ) : (
-                            <Badge variant={product.isActive ? "default" : "outline"}>
-                              {product.isActive ? "Active" : "Inactive"}
-                            </Badge>
-                          )}
+                          <Badge variant={product.isActive ? "default" : "outline"}>
+                            {product.isActive ? "Active" : "Inactive"}
+                          </Badge>
                         </TableCell>
                         
                         {isAdminOrManager && (
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="sm">Edit</Button>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingProduct(product);
+                                  setDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteProduct(product.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         )}
                       </TableRow>
@@ -182,6 +214,14 @@ const ProductsPage: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <ProductDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        initialData={editingProduct}
+        onSubmit={editingProduct ? handleEditProduct : handleAddProduct}
+        mode={editingProduct ? "edit" : "add"}
+      />
     </div>
   );
 };
