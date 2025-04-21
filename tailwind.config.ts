@@ -52,6 +52,31 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+        shop: {
+          DEFAULT: '#2563eb', // blue-600
+          light: '#3b82f6', // blue-500
+          dark: '#1d4ed8', // blue-700
+        },
+        inventory: {
+          DEFAULT: '#0ea5e9', // sky-500
+          light: '#38bdf8', // sky-400
+          dark: '#0284c7', // sky-600
+        },
+        sales: {
+          DEFAULT: '#14b8a6', // teal-500
+          light: '#2dd4bf', // teal-400
+          dark: '#0d9488', // teal-600
+        },
+        warning: {
+          DEFAULT: '#f59e0b', // amber-500
+          light: '#fbbf24', // amber-400
+          dark: '#d97706', // amber-600
+        },
+        success: {
+          DEFAULT: '#10b981', // emerald-500
+          light: '#34d399', // emerald-400
+          dark: '#059669', // emerald-600
+        },
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
