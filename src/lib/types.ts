@@ -11,7 +11,6 @@ export interface User {
   phone?: string;
   idProof?: string;
   address?: string;
-  instagram?: string;
 }
 
 // Shop Types
@@ -82,3 +81,4 @@ export interface Customer {
   customerType: SaleType;
   createdAt: string;
 }
+
