@@ -1,14 +1,15 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const AdminProfilePage: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, updateUser } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     name: user?.name || "",
@@ -40,12 +41,17 @@ const AdminProfilePage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real app, this would update the user in the backend
+    // Update the user context with new information
+    updateUser({ ...user, ...form });
+    
     toast({ 
       title: "Success",
       description: "Profile updated successfully!",
       variant: "default"
     });
+
+    // Navigate to dashboard after successful update
+    navigate("/");
   };
 
   return (

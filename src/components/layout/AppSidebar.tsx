@@ -1,4 +1,3 @@
-
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
@@ -8,7 +7,7 @@ import {
   ShoppingBag, 
   Store, 
   Users, 
-  LogOut, 
+  LogOut,
   User
 } from "lucide-react";
 import {
@@ -43,6 +42,21 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ onLogout }) => {
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <NavLink 
+                to="/admin-profile" 
+                className={({ isActive }) => 
+                  `flex items-center gap-3 px-4 py-3 hover:bg-sidebar-accent rounded-md transition-colors ${
+                    isActive ? "bg-sidebar-accent text-white" : "text-sidebar-foreground"
+                  }`
+                }
+              >
+                <User className="h-5 w-5" />
+                <span>Profile</span>
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <NavLink 
                 to="/" 
                 className={({ isActive }) => 
                   `flex items-center gap-3 px-4 py-3 hover:bg-sidebar-accent rounded-md transition-colors ${
@@ -55,6 +69,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ onLogout }) => {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <NavLink 
