@@ -16,6 +16,7 @@ const AdminProfilePage: React.FC = () => {
     phone: user?.phone || "",
     address: user?.address || "",
     avatar: user?.avatar || "",
+    instagram: user?.instagram || ""
   });
 
   if (!isAuthenticated || !user) {
@@ -36,7 +37,6 @@ const AdminProfilePage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Since data persistence is not implemented, we just show a toast for demo.
     toast({ description: "Profile updated successfully!", variant: "default" });
     // In a real app, would need to update the user in auth/data context and backend.
   };
@@ -76,6 +76,10 @@ const AdminProfilePage: React.FC = () => {
           <label className="block text-sm font-medium mb-1">Address</label>
           <Textarea name="address" value={form.address} onChange={handleChange} />
         </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Instagram</label>
+          <Input name="instagram" value={form.instagram} placeholder="Instagram username" onChange={handleChange} />
+        </div>
         <Button type="submit" className="w-full">Save Changes</Button>
       </form>
     </div>
@@ -83,3 +87,4 @@ const AdminProfilePage: React.FC = () => {
 };
 
 export default AdminProfilePage;
+
