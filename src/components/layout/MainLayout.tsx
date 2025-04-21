@@ -1,6 +1,5 @@
-
 import React from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate, Routes, Route } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import { 
   Home, 
@@ -24,6 +23,7 @@ import {
   SidebarProvider
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import AdminProfilePage from "@/pages/AdminProfilePage";
 
 export const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -65,17 +65,22 @@ export const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children 
               </div>
               
               <div className="flex items-center gap-2">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src={user?.avatar} alt={user?.name} />
-                  <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
-                </Avatar>
+                <Link to="/admin-profile" className="focus:outline-none">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={user?.avatar} alt={user?.name} />
+                    <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
+                  </Avatar>
+                </Link>
                 <div className="hidden sm:block text-sm">
                   <p className="font-semibold">{user?.name}</p>
                   <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
                 </div>
               </div>
             </div>
-            
+            {/* Route rendering */}
+            <Routes>
+              <Route path="/admin-profile" element={<AdminProfilePage />} />
+            </Routes>
             {children || <Outlet />}
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 // Authentication Types
 export type UserRole = 'admin' | 'manager' | 'staff';
 
@@ -11,6 +10,7 @@ export interface User {
   avatar?: string;
   phone?: string;
   idProof?: string;
+  address?: string;     // <-- ADDED address FIELD
 }
 
 // Shop Types
