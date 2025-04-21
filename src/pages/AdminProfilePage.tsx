@@ -37,7 +37,7 @@ const AdminProfilePage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Since data persistence is not implemented, we just show a toast for demo.
-    toast({ description: "Profile updated successfully!", variant: "success" });
+    toast({ description: "Profile updated successfully!", variant: "default" });
     // In a real app, would need to update the user in auth/data context and backend.
   };
 
