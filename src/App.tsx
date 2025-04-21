@@ -11,6 +11,7 @@ import DashboardPage from "@/pages/DashboardPage";
 import ProductsPage from "@/pages/ProductsPage";
 import SalesPage from "@/pages/SalesPage";
 import NotFound from "./pages/NotFound";
+import ShopList from "@/components/shops/ShopList"
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,8 @@ const App = () => (
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/sales" element={<SalesPage />} />
                 {/* These routes will be implemented later */}
-                <Route path="/shops" element={<div className="p-8">Shops page coming soon</div>} />
+                {/* Shops Section */}
+                <Route path="/shops" element={<ShopList />} />
                 <Route path="/customers" element={<div className="p-8">Customers page coming soon</div>} />
                 <Route path="/users" element={<div className="p-8">Users page coming soon</div>} />
               </Route>
