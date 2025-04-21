@@ -10,7 +10,8 @@ export interface User {
   avatar?: string;
   phone?: string;
   idProof?: string;
-  address?: string;     // <-- ADDED address FIELD
+  address?: string;
+  instagram?: string;
 }
 
 // Shop Types

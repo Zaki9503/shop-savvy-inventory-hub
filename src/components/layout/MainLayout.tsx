@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, NavLink, Outlet, useNavigate, Routes, Route } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import { 
   Home, 
@@ -23,7 +23,6 @@ import {
   SidebarProvider
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import AdminProfilePage from "@/pages/AdminProfilePage";
 
 export const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -77,10 +76,7 @@ export const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children 
                 </div>
               </div>
             </div>
-            {/* Route rendering */}
-            <Routes>
-              <Route path="/admin-profile" element={<AdminProfilePage />} />
-            </Routes>
+            {/* Render outlet */}
             {children || <Outlet />}
           </div>
         </div>
