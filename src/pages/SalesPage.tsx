@@ -9,23 +9,28 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Sale, SaleType } from "@/lib/types";
+import SaleDetailsModal from "@/components/sales/SaleDetailsModal";
 
 const SalesPage: React.FC = () => {
-  const { sales, shops, customers, getShop, getCustomer } = useData();
+  const { sales, shops, customers, getShop, getCustomer, products } = useData();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<keyof Sale>("createdAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [filterType, setFilterType] = useState<SaleType | "all">("all");
-  
+
+  // Modal state
+  const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
   // Filter by shop if user is not admin
   const shopId = user?.shopId;
   const filteredSales = sales
-    .filter(sale => 
+    .filter(sale =>
       // Filter by shop
       (!shopId || sale.shopId === shopId) &&
       // Filter by search term
-      (searchTerm === "" || 
+      (searchTerm === "" ||
         // Search by sale ID
         sale.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         // Search by customer name
@@ -39,20 +44,20 @@ const SalesPage: React.FC = () => {
     // Sort results
     .sort((a, b) => {
       if (sortField === "createdAt") {
-        return sortDirection === "asc" 
+        return sortDirection === "asc"
           ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
           : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
-      
+
       if (sortField === "total") {
-        return sortDirection === "asc" 
+        return sortDirection === "asc"
           ? a.total - b.total
           : b.total - a.total;
       }
-      
+
       return 0;
     });
-  
+
   const handleSort = (field: keyof Sale) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -61,7 +66,7 @@ const SalesPage: React.FC = () => {
       setSortDirection("desc");
     }
   };
-  
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -70,7 +75,7 @@ const SalesPage: React.FC = () => {
       day: "numeric",
     });
   };
-  
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -78,13 +83,13 @@ const SalesPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Sales</h1>
           <p className="text-gray-500">Manage and track your sales</p>
         </div>
-        
+
         <Button className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
           <span>New Sale</span>
         </Button>
       </div>
-      
+
       <Card>
         <CardContent className="p-6">
           <div className="mb-6 flex flex-col sm:flex-row items-center gap-4">
@@ -97,9 +102,9 @@ const SalesPage: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            
+
             <div className="flex gap-2 w-full sm:w-auto">
-              <select 
+              <select
                 className="h-9 rounded-md border border-input px-3 py-1 text-sm"
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value as SaleType | "all")}
@@ -109,7 +114,7 @@ const SalesPage: React.FC = () => {
                 <option value="credit">Credit</option>
                 <option value="lease">Lease</option>
               </select>
-              
+
               {!shopId && (
                 <select className="h-9 rounded-md border border-input px-3 py-1 text-sm">
                   <option value="">All Shops</option>
@@ -120,13 +125,13 @@ const SalesPage: React.FC = () => {
               )}
             </div>
           </div>
-          
+
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Sale ID</TableHead>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer"
                     onClick={() => handleSort("createdAt")}
                   >
@@ -140,7 +145,7 @@ const SalesPage: React.FC = () => {
                   <TableHead>Customer</TableHead>
                   {!shopId && <TableHead>Shop</TableHead>}
                   <TableHead>Type</TableHead>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer"
                     onClick={() => handleSort("total")}
                   >
@@ -166,7 +171,7 @@ const SalesPage: React.FC = () => {
                   filteredSales.map((sale) => {
                     const customer = sale.customerId ? getCustomer(sale.customerId) : null;
                     const shop = getShop(sale.shopId);
-                    
+
                     return (
                       <TableRow key={sale.id}>
                         <TableCell className="font-mono text-sm">{sale.id}</TableCell>
@@ -181,19 +186,17 @@ const SalesPage: React.FC = () => {
                             <span className="text-gray-500">Walk-in Customer</span>
                           )}
                         </TableCell>
-                        
                         {!shopId && (
                           <TableCell>
                             {shop?.name || "Unknown Shop"}
                           </TableCell>
                         )}
-                        
                         <TableCell>
                           <Badge
                             variant="outline"
                             className={
-                              sale.saleType === "cash" 
-                                ? "border-primary text-primary bg-primary/10" 
+                              sale.saleType === "cash"
+                                ? "border-primary text-primary bg-primary/10"
                                 : sale.saleType === "credit"
                                   ? "border-inventory-DEFAULT text-inventory-DEFAULT bg-inventory-DEFAULT/10"
                                   : "border-sales-DEFAULT text-sales-DEFAULT bg-sales-DEFAULT/10"
@@ -202,7 +205,6 @@ const SalesPage: React.FC = () => {
                             {sale.saleType.charAt(0).toUpperCase() + sale.saleType.slice(1)}
                           </Badge>
                         </TableCell>
-                        
                         <TableCell>
                           <div className="flex flex-col">
                             <span className="font-medium">${sale.total.toFixed(2)}</span>
@@ -211,15 +213,20 @@ const SalesPage: React.FC = () => {
                             )}
                           </div>
                         </TableCell>
-                        
                         <TableCell>
                           <Badge variant={sale.status === "completed" ? "default" : "outline"}>
                             {sale.status.charAt(0).toUpperCase() + sale.status.slice(1)}
                           </Badge>
                         </TableCell>
-                        
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">View</Button>
+                          <Button variant="ghost" size="sm"
+                            onClick={() => {
+                              setSelectedSale(sale);
+                              setModalOpen(true);
+                            }}
+                          >
+                            View
+                          </Button>
                         </TableCell>
                       </TableRow>
                     );
@@ -230,6 +237,12 @@ const SalesPage: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+      <SaleDetailsModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        sale={selectedSale}
+        products={products}
+      />
     </div>
   );
 };
