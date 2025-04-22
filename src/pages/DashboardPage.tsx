@@ -3,7 +3,6 @@ import React from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useData } from "@/lib/data-context";
 import StatCard from "@/components/dashboard/StatCard";
-import InventoryStatusCard from "@/components/dashboard/InventoryStatusCard";
 import SalesChart from "@/components/dashboard/SalesChart";
 import { 
   ShoppingBag, 
@@ -18,9 +17,7 @@ const DashboardPage: React.FC = () => {
     shops, 
     products,
     sales, 
-    customers, 
-    inventory,
-    getShopInventory,
+    customers 
   } = useData();
   
   // For managers, filter data by their shop
@@ -32,35 +29,20 @@ const DashboardPage: React.FC = () => {
     : sales;
   
   // Calculate total sales by type
-  const cashSales = filteredSales
+  const cashPayments = filteredSales
     .filter(sale => sale.saleType === "cash")
     .reduce((sum, sale) => sum + sale.total, 0);
     
-  const creditSales = filteredSales
-    .filter(sale => sale.saleType === "credit")
-    .reduce((sum, sale) => sum + sale.total, 0);
-    
-  const leaseSales = filteredSales
-    .filter(sale => sale.saleType === "lease")
+  const onlinePayments = filteredSales
+    .filter(sale => sale.saleType === "online")
     .reduce((sum, sale) => sum + sale.total, 0);
   
-  const totalSales = cashSales + creditSales + leaseSales;
+  const totalSales = cashPayments + onlinePayments;
   
   // Get shops to display
   const displayShops = isShopManager
     ? shops.filter(shop => shop.id === user.shopId)
     : shops;
-  
-  // Calculate inventory status for each shop
-  const getInventoryStatus = (shopId: string) => {
-    const shopInventory = getShopInventory(shopId);
-    const lowStock = shopInventory.filter(
-      item => item.quantity > 0 && item.quantity <= item.minStockLevel
-    ).length;
-    const outOfStock = shopInventory.filter(item => item.quantity === 0).length;
-    
-    return { lowStock, outOfStock };
-  };
 
   return (
     <div className="space-y-6">
@@ -89,63 +71,30 @@ const DashboardPage: React.FC = () => {
           value={products.length}
           icon={<Package className="h-6 w-6 text-sales-DEFAULT" />}
         />
-        
-        <StatCard 
-          title="Customers"
-          value={customers.length}
-          icon={<Users className="h-6 w-6 text-warning-DEFAULT" />}
-          trend={{ value: 8.2, isPositive: true }}
-        />
       </div>
       
       {/* Sales by Type */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">Cash Sales</h3>
-          <p className="text-3xl font-bold text-primary">${cashSales.toFixed(2)}</p>
+          <h3 className="text-lg font-semibold mb-4">Cash Payments</h3>
+          <p className="text-3xl font-bold text-primary">${cashPayments.toFixed(2)}</p>
           <p className="text-sm text-gray-500 mt-1">
-            {Math.round((cashSales / totalSales) * 100)}% of total sales
+            {Math.round((cashPayments / totalSales) * 100)}% of total sales
           </p>
         </div>
         
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">Credit Sales</h3>
-          <p className="text-3xl font-bold text-inventory-DEFAULT">${creditSales.toFixed(2)}</p>
+          <h3 className="text-lg font-semibold mb-4">Online Payments</h3>
+          <p className="text-3xl font-bold text-inventory-DEFAULT">${onlinePayments.toFixed(2)}</p>
           <p className="text-sm text-gray-500 mt-1">
-            {Math.round((creditSales / totalSales) * 100)}% of total sales
-          </p>
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">Lease Sales</h3>
-          <p className="text-3xl font-bold text-sales-DEFAULT">${leaseSales.toFixed(2)}</p>
-          <p className="text-sm text-gray-500 mt-1">
-            {Math.round((leaseSales / totalSales) * 100)}% of total sales
+            {Math.round((onlinePayments / totalSales) * 100)}% of total sales
           </p>
         </div>
       </div>
       
-      {/* Sales Chart and Inventory Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <SalesChart sales={filteredSales} />
-        </div>
-        
-        <div className="space-y-6">
-          <h3 className="text-lg font-semibold">Inventory Status</h3>
-          
-          {displayShops.map(shop => {
-            const { lowStock, outOfStock } = getInventoryStatus(shop.id);
-            return (
-              <InventoryStatusCard 
-                key={shop.id}
-                shopName={shop.name}
-                lowStockCount={lowStock}
-                outOfStockCount={outOfStock}
-              />
-            );
-          })}
-        </div>
+      {/* Products Sold Chart */}
+      <div className="grid grid-cols-1">
+        <SalesChart sales={filteredSales} shops={displayShops} />
       </div>
     </div>
   );

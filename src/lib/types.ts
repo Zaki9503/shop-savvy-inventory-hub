@@ -1,3 +1,4 @@
+
 // Authentication Types
 export type UserRole = 'admin' | 'manager' | 'staff';
 
@@ -50,7 +51,7 @@ export interface ShopInventory {
 }
 
 // Sales Types
-export type SaleType = 'cash' | 'credit' | 'lease';
+export type SaleType = 'cash' | 'online';
 
 export interface Sale {
   id: string;

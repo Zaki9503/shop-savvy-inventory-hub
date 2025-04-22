@@ -1,15 +1,16 @@
 
 import React from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Sale } from "@/lib/types";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { Sale, Shop } from "@/lib/types";
 
 interface SalesChartProps {
   sales: Sale[];
+  shops: Shop[];
 }
 
-// Helper function to group sales by date
-const groupSalesByDate = (sales: Sale[], days = 7) => {
-  const data: Record<string, { date: string; cash: number; credit: number; lease: number }> = {};
+// Helper function to group product quantities by date and shop
+const groupProductsByDateAndShop = (sales: Sale[], shops: Shop[], days = 7) => {
+  const data: Record<string, { date: string } & Record<string, number>> = {};
   
   // Get the last 'days' days
   const endDate = new Date();
@@ -19,14 +20,21 @@ const groupSalesByDate = (sales: Sale[], days = 7) => {
   // Initialize data structure with dates
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
     const dateStr = d.toISOString().split('T')[0];
-    data[dateStr] = { date: dateStr, cash: 0, credit: 0, lease: 0 };
+    data[dateStr] = { 
+      date: dateStr,
+      ...Object.fromEntries(shops.map(shop => [shop.name, 0]))
+    };
   }
   
-  // Aggregate sales by date and type
+  // Aggregate product quantities by date and shop
   sales.forEach(sale => {
     const dateStr = new Date(sale.createdAt).toISOString().split('T')[0];
     if (data[dateStr]) {
-      data[dateStr][sale.saleType] += sale.total;
+      const shop = shops.find(s => s.id === sale.shopId);
+      if (shop) {
+        const totalQuantity = sale.items.reduce((sum, item) => sum + item.quantity, 0);
+        data[dateStr][shop.name] += totalQuantity;
+      }
     }
   });
   
@@ -34,21 +42,24 @@ const groupSalesByDate = (sales: Sale[], days = 7) => {
   return Object.values(data).sort((a, b) => a.date.localeCompare(b.date));
 };
 
-export const SalesChart: React.FC<SalesChartProps> = ({ sales }) => {
-  const data = groupSalesByDate(sales);
+export const SalesChart: React.FC<SalesChartProps> = ({ sales, shops }) => {
+  const data = groupProductsByDateAndShop(sales, shops);
   
   // Format date for display
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
   };
+
+  // Generate a unique color for each shop
+  const colors = ['#2563eb', '#0ea5e9', '#14b8a6'];
   
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
-      <h3 className="text-lg font-semibold mb-4">Sales Trend (Last 7 Days)</h3>
+      <h3 className="text-lg font-semibold mb-4">Products Sold by Store (Last 7 Days)</h3>
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
+          <LineChart
             data={data}
             margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
           >
@@ -56,14 +67,21 @@ export const SalesChart: React.FC<SalesChartProps> = ({ sales }) => {
             <XAxis dataKey="date" tickFormatter={formatDate} />
             <YAxis />
             <Tooltip 
-              formatter={(value: number) => [`$${value.toFixed(2)}`, null]}
+              formatter={(value: number) => [`${value} units`, null]}
               labelFormatter={(label) => formatDate(label as string)}
             />
             <Legend />
-            <Bar dataKey="cash" name="Cash Sales" fill="#2563eb" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="credit" name="Credit Sales" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="lease" name="Lease Sales" fill="#14b8a6" radius={[4, 4, 0, 0]} />
-          </BarChart>
+            {shops.map((shop, index) => (
+              <Line
+                key={shop.id}
+                type="monotone"
+                dataKey={shop.name}
+                name={`${shop.name}`}
+                stroke={colors[index % colors.length]}
+                dot={false}
+              />
+            ))}
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </div>

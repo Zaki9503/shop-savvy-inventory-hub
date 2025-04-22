@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from "react";
 import { Shop, Product, ShopInventory, Sale, Customer } from "./types";
 
@@ -45,6 +44,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Fresh organic whole milk, 1 gallon",
     image: "https://placehold.co/200x200?text=Milk",
     isActive: true,
+    stock: 100
   },
   {
     id: "prod2",
@@ -56,6 +56,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Artisan whole wheat bread, 1 loaf",
     image: "https://placehold.co/200x200?text=Bread",
     isActive: true,
+    stock: 75
   },
   {
     id: "prod3",
@@ -67,6 +68,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Free-range organic eggs, dozen",
     image: "https://placehold.co/200x200?text=Eggs",
     isActive: true,
+    stock: 120
   },
   {
     id: "prod4",
@@ -78,6 +80,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Ripe Hass avocados, each",
     image: "https://placehold.co/200x200?text=Avocado",
     isActive: true,
+    stock: 200
   },
   {
     id: "prod5",
@@ -89,6 +92,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Premium ground coffee, 12 oz bag",
     image: "https://placehold.co/200x200?text=Coffee",
     isActive: true,
+    stock: 85
   },
 ];
 
@@ -148,13 +152,13 @@ const MOCK_CUSTOMERS: Customer[] = [
 // Generate some sales for each shop
 const generateMockSales = (): Sale[] => {
   const sales: Sale[] = [];
-  const saleTypes: ("cash" | "credit" | "lease")[] = ["cash", "credit", "lease"];
+  const saleTypes: ("cash" | "online")[] = ["cash", "online"];
   const today = new Date();
   
   // Generate 15 random sales across different shops
   for (let i = 1; i <= 15; i++) {
     const shopId = `shop${Math.floor(Math.random() * 3) + 1}`;
-    const saleType = saleTypes[Math.floor(Math.random() * 3)];
+    const saleType = saleTypes[Math.floor(Math.random() * 2)];
     const customerId = saleType !== "cash" 
       ? `cust${Math.floor(Math.random() * 2) + 2}` 
       : undefined;
@@ -245,7 +249,7 @@ interface DataContextType {
   // Sales operations
   addSale: (sale: Omit<Sale, "id" | "createdAt">) => Sale;
   getSalesByShop: (shopId: string) => Sale[];
-  getSalesByType: (type: "cash" | "credit" | "lease") => Sale[];
+  getSalesByType: (type: "cash" | "online") => Sale[];
   getSalesByCustomer: (customerId: string) => Sale[];
   
   // Customer operations
@@ -406,7 +410,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getSalesByShop = (shopId: string) => 
     sales.filter(sale => sale.shopId === shopId);
 
-  const getSalesByType = (type: "cash" | "credit" | "lease") => 
+  const getSalesByType = (type: "cash" | "online") => 
     sales.filter(sale => sale.saleType === type);
 
   const getSalesByCustomer = (customerId: string) => 
