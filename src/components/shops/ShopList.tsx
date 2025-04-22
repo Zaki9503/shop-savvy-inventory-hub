@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useData } from "@/lib/data-context";
 import { Shop, User } from "@/lib/types";
@@ -62,7 +61,7 @@ const ShopList: React.FC = () => {
   const [shopNo, setShopNo] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [managerName, setManagerName] = useState("");
 
   const openDetail = (shop: Shop) => {
     setSelectedShop(shop);
@@ -83,12 +82,12 @@ const ShopList: React.FC = () => {
 
   const handleAddShop = () => {
     if (!name || !shopNo || !address) return;
-    addShop({ name, shopNo, address, phone, email });
+    addShop({ name, shopNo, address, phone, managerName } as any);
     setName("");
     setShopNo("");
     setAddress("");
     setPhone("");
-    setEmail("");
+    setManagerName("");
   };
 
   const handleDeleteShop = (id: string) => {
@@ -129,7 +128,7 @@ const ShopList: React.FC = () => {
               <Input placeholder="Phone" value={phone} onChange={e => setPhone(e.target.value)} />
             </div>
             <div>
-              <Input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+              <Input placeholder="Manager Name" value={managerName} onChange={e => setManagerName(e.target.value)} />
             </div>
             <div className="md:col-span-5 flex justify-end mt-1">
               <Button type="submit" size="sm" className="gap-2">
@@ -175,8 +174,6 @@ const ShopList: React.FC = () => {
         open={modalOpen}
         onClose={closeDetail}
         shop={selectedShop}
-        manager={selectedShop ? getManagerAndWorkers(selectedShop).manager : null}
-        workers={selectedShop ? getManagerAndWorkers(selectedShop).workers : []}
       />
     </div>
   );
