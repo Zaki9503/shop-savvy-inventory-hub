@@ -15,8 +15,7 @@ const DashboardPage: React.FC = () => {
   const { 
     shops, 
     products,
-    sales, 
-    customers 
+    sales
   } = useData();
   
   // For managers, filter data by their shop
