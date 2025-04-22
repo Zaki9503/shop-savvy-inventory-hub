@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useData } from "@/lib/data-context";
@@ -94,7 +93,7 @@ const DashboardPage: React.FC = () => {
       
       {/* Products Sold Chart */}
       <div className="grid grid-cols-1">
-        <SalesChart sales={filteredSales} shops={displayShops} />
+        <SalesChart />
       </div>
     </div>
   );
