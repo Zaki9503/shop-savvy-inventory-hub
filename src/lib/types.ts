@@ -1,3 +1,4 @@
+
 // Authentication Types
 export type UserRole = 'admin' | 'manager' | 'staff';
 

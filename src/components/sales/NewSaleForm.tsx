@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ShoppingBag, Plus, Minus, Search, QrCode, CreditCard, Banknote } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import QRCodeDisplay from "./QRCodeDisplay";
 
 interface NewSaleFormProps {
   onSaleComplete: () => void;
@@ -278,12 +279,7 @@ const NewSaleForm: React.FC<NewSaleFormProps> = ({ onSaleComplete }) => {
             <DialogTitle>Scan QR Code for Payment</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center justify-center p-6 space-y-4">
-            <div className="w-48 h-48 bg-white p-2 rounded-lg flex items-center justify-center">
-              <QrCode className="w-full h-full" />
-            </div>
-            <p className="text-center text-sm text-gray-500">
-              Payment number: 7843097742
-            </p>
+            <QRCodeDisplay size={250} />
             <p className="text-center text-sm">
               Amount: <span className="font-bold">${totalAmount.toFixed(2)}</span>
             </p>
