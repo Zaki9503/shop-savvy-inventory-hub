@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useData } from "@/lib/data-context";
 import { Shop, User } from "@/lib/types";
@@ -54,9 +53,8 @@ const getCityFromAddress = (address: string) => {
 };
 
 const ShopList: React.FC = () => {
-  const { shops, addShop, deleteShop } = useData();
+  const { shops, addShop, deleteShop, activeShopId, setActiveShop } = useData();
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
-  const [activeShopId, setActiveShopId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   // Inputs for adding a shop
@@ -104,8 +102,9 @@ const ShopList: React.FC = () => {
   };
 
   const handleShopClick = (shop: Shop) => {
-    setActiveShopId(shop.id);
-    openDetail(shop);
+    setActiveShop(shop.id);
+    setSelectedShop(shop);
+    setModalOpen(true);
   };
 
   return (
@@ -193,7 +192,6 @@ const ShopList: React.FC = () => {
         ))}
       </div>
 
-      {/* Detail Modal */}
       <ShopDetailModal
         open={modalOpen}
         onClose={closeDetail}
@@ -205,4 +203,3 @@ const ShopList: React.FC = () => {
 };
 
 export default ShopList;
-

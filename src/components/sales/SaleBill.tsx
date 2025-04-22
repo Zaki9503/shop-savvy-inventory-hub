@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sale } from '@/lib/types';
 import { useData } from '@/lib/data-context';
@@ -12,8 +11,9 @@ interface SaleBillProps {
 }
 
 const SaleBill: React.FC<SaleBillProps> = ({ sale }) => {
-  const { getShop, getProduct } = useData();
-  const shop = getShop(sale.shopId);
+  const { getShop, getProduct, activeShopId } = useData();
+  // Use active shop if available, otherwise fallback to sale's shop
+  const shop = activeShopId ? getShop(activeShopId) : getShop(sale.shopId);
 
   const handlePrint = () => {
     window.print();

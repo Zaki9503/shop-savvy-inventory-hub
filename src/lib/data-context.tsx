@@ -210,6 +210,9 @@ interface DataContextType {
   addSale: (sale: Omit<Sale, "id" | "createdAt">) => Sale;
   getSalesByShop: (shopId: string) => Sale[];
   getSalesByType: (type: SaleType) => Sale[];
+
+  activeShopId: string | null;
+  setActiveShop: (shopId: string) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -238,6 +241,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
   const [inventory, setInventory] = useState<ShopInventory[]>(MOCK_INVENTORY);
   const [sales, setSales] = useState<Sale[]>(MOCK_SALES);
+  const [activeShopId, setActiveShopId] = useState<string | null>(null);
 
   // Shop operations
   const addShop = (shopData: Omit<Shop, "id" | "createdAt">) => {
@@ -386,6 +390,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getSalesByType = (type: SaleType) => 
     sales.filter(sale => sale.saleType === type);
 
+  const setActiveShop = (shopId: string) => {
+    setActiveShopId(shopId);
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -393,6 +401,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         products,
         inventory,
         sales,
+        activeShopId,
+        setActiveShop,
         addShop,
         updateShop,
         deleteShop,
