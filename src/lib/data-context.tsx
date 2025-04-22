@@ -44,6 +44,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Fresh organic whole milk, 1 gallon",
     image: "https://placehold.co/200x200?text=Milk",
     isActive: true,
+    expiryDate: new Date(2024, 0, 15).toISOString(),
     stock: 100
   },
   {
@@ -56,6 +57,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Artisan whole wheat bread, 1 loaf",
     image: "https://placehold.co/200x200?text=Bread",
     isActive: true,
+    expiryDate: new Date(2024, 2, 10).toISOString(),
     stock: 75
   },
   {
@@ -68,6 +70,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Free-range organic eggs, dozen",
     image: "https://placehold.co/200x200?text=Eggs",
     isActive: true,
+    expiryDate: new Date(2023, 11, 22).toISOString(),
     stock: 120
   },
   {
@@ -80,6 +83,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Ripe Hass avocados, each",
     image: "https://placehold.co/200x200?text=Avocado",
     isActive: true,
+    expiryDate: new Date(2024, 3, 5).toISOString(),
     stock: 200
   },
   {
@@ -92,6 +96,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Premium ground coffee, 12 oz bag",
     image: "https://placehold.co/200x200?text=Coffee",
     isActive: true,
+    expiryDate: new Date(2024, 4, 18).toISOString(),
     stock: 85
   },
 ];
@@ -155,7 +160,7 @@ const generateMockSales = (): Sale[] => {
   const saleTypes: SaleType[] = ["cash", "online"];
   const today = new Date();
   
-  // Generate 15 random sales across different shops
+  // Generate 15 random sales
   for (let i = 1; i <= 15; i++) {
     const shopId = `shop${Math.floor(Math.random() * 3) + 1}`;
     const saleType = saleTypes[Math.floor(Math.random() * 2)];
@@ -235,8 +240,7 @@ interface DataContextType {
   // Sales operations
   addSale: (sale: Omit<Sale, "id" | "createdAt">) => Sale;
   getSalesByShop: (shopId: string) => Sale[];
-  getSalesByType: (type: "cash" | "online") => Sale[];
-  getSalesByCustomer: (customerId: string) => Sale[];
+  getSalesByType: (type: SaleType) => Sale[];
   
   // Customer operations
   addCustomer: (customer: Omit<Customer, "id" | "createdAt">) => Customer;
@@ -385,6 +389,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getProductInventory = (productId: string) => 
     inventory.filter(item => item.productId === productId);
 
+    // Update product stock when a sale is made
+    const updateProductStock = (shopId: string, items: SaleItem[]) => {
+      items.forEach(item => {
+        const product = products.find(p => p.id === item.productId);
+        if (product) {
+          const updatedProduct = {
+            ...product,
+            stock: Math.max(0, product.stock - item.quantity)
+          };
+          updateProduct(product.id, updatedProduct);
+        }
+      });
+    };
+
   // Sales operations
   const addSale = (saleData: Omit<Sale, "id" | "createdAt">) => {
     const newSale: Sale = {
@@ -393,20 +411,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       createdAt: new Date().toISOString(),
     };
 
-    // Update inventory for sold items
-    newSale.items.forEach(item => {
-      const inventoryItem = inventory.find(
-        inv => inv.shopId === newSale.shopId && inv.productId === item.productId
-      );
-
-      if (inventoryItem) {
-        updateInventory(
-          newSale.shopId,
-          item.productId,
-          inventoryItem.quantity - item.quantity
-        );
-      }
-    });
+    // Update product stock levels
+    updateProductStock(newSale.shopId, newSale.items);
 
     setSales([...sales, newSale]);
     return newSale;
@@ -415,7 +421,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getSalesByShop = (shopId: string) => 
     sales.filter(sale => sale.shopId === shopId);
 
-  const getSalesByType = (type: "cash" | "online") => 
+  const getSalesByType = (type: SaleType) => 
     sales.filter(sale => sale.saleType === type);
 
   const getSalesByCustomer = (customerId: string) => 

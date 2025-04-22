@@ -71,16 +71,3 @@ export interface SaleItem {
   price: number;
   total: number;
 }
-
-// Customer Types
-export type SaleType = 'cash' | 'online';
-
-export interface Customer {
-  id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  customerType: SaleType;
-  createdAt: string;
-}

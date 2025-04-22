@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useData } from "@/lib/data-context";
 import { useAuth } from "@/lib/auth-context";
@@ -27,8 +26,7 @@ const ProductsPage: React.FC = () => {
   const filteredProducts = products
     .filter(product => 
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase())
+      product.sku.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => a.name.localeCompare(b.name));
   
@@ -121,9 +119,9 @@ const ProductsPage: React.FC = () => {
                 <TableRow>
                   <TableHead>Product</TableHead>
                   <TableHead>SKU</TableHead>
-                  <TableHead>Category</TableHead>
                   <TableHead>Price</TableHead>
-                  {shopId && <TableHead>Stock</TableHead>}
+                  <TableHead>Stock</TableHead>
+                  <TableHead>EXP</TableHead>
                   <TableHead>Status</TableHead>
                   {isAdminOrManager && <TableHead className="text-right">Actions</TableHead>}
                 </TableRow>
@@ -131,14 +129,13 @@ const ProductsPage: React.FC = () => {
               <TableBody>
                 {filteredProducts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={shopId ? 7 : 6} className="h-24 text-center">
+                    <TableCell colSpan={7} className="h-24 text-center">
                       No products found.
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredProducts.map((product) => {
-                    const { quantity, minLevel } = shopId ? getStockLevel(product.id) : { quantity: 0, minLevel: 0 };
-                    const stockStatus = getStockStatus(quantity, minLevel);
+                    const isExpired = product.expiryDate && new Date(product.expiryDate) < new Date();
                     
                     return (
                       <TableRow key={product.id}>
@@ -164,20 +161,18 @@ const ProductsPage: React.FC = () => {
                           </div>
                         </TableCell>
                         <TableCell className="font-mono text-sm">{product.sku}</TableCell>
-                        <TableCell>{product.category}</TableCell>
                         <TableCell>${product.price.toFixed(2)}</TableCell>
-                        
-                        {shopId && (
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="font-medium">{quantity}</span>
-                              <span className="text-xs text-gray-500">Min: {minLevel}</span>
-                            </div>
-                          </TableCell>
-                        )}
-                        
+                        <TableCell>{product.stock}</TableCell>
                         <TableCell>
-                          <Badge variant={product.isActive ? "default" : "outline"}>
+                          <span className={isExpired ? "text-red-500 font-medium" : ""}>
+                            {product.expiryDate ? new Date(product.expiryDate).toLocaleDateString() : "-"}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={product.isActive ? "default" : "outline"}
+                            className={!product.isActive ? "bg-orange-100 text-orange-700 hover:bg-orange-100/80" : ""}
+                          >
                             {product.isActive ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>
