@@ -94,7 +94,7 @@ const ShopList: React.FC = () => {
   const handleDeleteShop = (id: string) => {
     deleteShop(id);
     if (activeShopId === id) {
-      setActiveShopId(null);
+      setActiveShop(""); // Use setActiveShop instead of setActiveShopId
     }
     if (selectedShop && selectedShop.id === id) {
       closeDetail();

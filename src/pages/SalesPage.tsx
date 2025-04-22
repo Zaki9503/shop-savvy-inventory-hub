@@ -12,7 +12,7 @@ import SaleDetailsModal from "@/components/sales/SaleDetailsModal";
 import NewSaleForm from "@/components/sales/NewSaleForm";
 
 const SalesPage: React.FC = () => {
-  const { sales, shops, getShop, products } = useData();
+  const { sales, shops, getShop, products, activeShopId } = useData();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<keyof Sale>("createdAt");
@@ -37,7 +37,7 @@ const SalesPage: React.FC = () => {
         // Search by sale ID
         sale.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         // Search by shop name
-        getShop(sale.shopId)?.name.toLowerCase().includes(searchTerm.toLowerCase())
+        getShop(activeShopId || sale.shopId)?.name.toLowerCase().includes(searchTerm.toLowerCase())
       ) &&
       // Filter by sale type
       (filterType === "all" || sale.saleType === filterType)
@@ -178,7 +178,7 @@ const SalesPage: React.FC = () => {
                     </TableRow>
                   ) : (
                     filteredSales.map((sale) => {
-                      const shop = getShop(sale.shopId);
+                      const shop = activeShopId ? getShop(activeShopId) : getShop(sale.shopId);
 
                       return (
                         <TableRow key={sale.id}>
