@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useData } from "@/lib/data-context";
 import { Shop, User } from "@/lib/types";
@@ -5,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash, Plus, Building, Home } from "lucide-react";
+import { cn } from "@/lib/utils";
 import ShopDetailModal from "./ShopDetailModal";
 
 // Mock users to simulate shop managers and workers (replace with your real users data as needed)
@@ -54,6 +56,7 @@ const getCityFromAddress = (address: string) => {
 const ShopList: React.FC = () => {
   const { shops, addShop, deleteShop } = useData();
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
+  const [activeShopId, setActiveShopId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   // Inputs for adding a shop
@@ -92,10 +95,17 @@ const ShopList: React.FC = () => {
 
   const handleDeleteShop = (id: string) => {
     deleteShop(id);
-    // Optionally close modal if deleting selected shop
+    if (activeShopId === id) {
+      setActiveShopId(null);
+    }
     if (selectedShop && selectedShop.id === id) {
       closeDetail();
     }
+  };
+
+  const handleShopClick = (shop: Shop) => {
+    setActiveShopId(shop.id);
+    openDetail(shop);
   };
 
   return (
@@ -141,13 +151,24 @@ const ShopList: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {shops.map(shop => (
-          <Card key={shop.id} className="hover:ring-primary hover:ring-2 transition-shadow relative">
+          <Card 
+            key={shop.id} 
+            className={cn(
+              "hover:ring-2 transition-all relative cursor-pointer",
+              activeShopId === shop.id 
+                ? "ring-2 ring-green-500 bg-green-50"
+                : "hover:ring-primary"
+            )}
+          >
             <button
               className="w-full text-left px-6 py-4 focus-visible:outline-none"
-              onClick={() => openDetail(shop)}
+              onClick={() => handleShopClick(shop)}
             >
               <div className="font-semibold text-lg flex gap-2 items-center">
-                <Home className="inline mr-1 text-muted-foreground" />
+                <Home className={cn(
+                  "inline mr-1",
+                  activeShopId === shop.id ? "text-green-500" : "text-muted-foreground"
+                )} />
                 {shop.name}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -160,7 +181,10 @@ const ShopList: React.FC = () => {
               size="icon"
               variant="destructive"
               className="absolute top-2 right-2"
-              onClick={() => handleDeleteShop(shop.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteShop(shop.id);
+              }}
               aria-label="Delete Shop"
             >
               <Trash size={18} />
@@ -174,9 +198,11 @@ const ShopList: React.FC = () => {
         open={modalOpen}
         onClose={closeDetail}
         shop={selectedShop}
+        isActive={selectedShop ? activeShopId === selectedShop.id : false}
       />
     </div>
   );
 };
 
 export default ShopList;
+
