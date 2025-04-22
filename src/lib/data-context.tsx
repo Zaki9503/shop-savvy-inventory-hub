@@ -261,6 +261,25 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+const generateSaleId = (sales: Sale[]): string => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = (today.getMonth() + 1).toString().padStart(2, '0');
+  
+  // Filter sales from current month
+  const monthSales = sales.filter(sale => {
+    const saleDate = new Date(sale.createdAt);
+    return saleDate.getMonth() === today.getMonth() && 
+           saleDate.getFullYear() === today.getFullYear();
+  });
+  
+  // Get sequence number
+  const sequence = (monthSales.length + 1).toString().padStart(3, '0');
+  
+  // Format: INV-YYYYMM-XXX (e.g., INV-202504-001)
+  return `INV-${year}${month}-${sequence}`;
+};
+
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [shops, setShops] = useState<Shop[]>(MOCK_SHOPS);
   const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
@@ -384,7 +403,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addSale = (saleData: Omit<Sale, "id" | "createdAt">) => {
     const newSale: Sale = {
       ...saleData,
-      id: `sale${sales.length + 1}`,
+      id: generateSaleId(sales),
       createdAt: new Date().toISOString(),
     };
 

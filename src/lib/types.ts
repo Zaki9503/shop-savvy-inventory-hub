@@ -55,7 +55,6 @@ export type SaleType = 'cash' | 'online';
 export interface Sale {
   id: string;
   shopId: string;
-  customerId?: string;
   saleType: SaleType;
   items: SaleItem[];
   total: number;
