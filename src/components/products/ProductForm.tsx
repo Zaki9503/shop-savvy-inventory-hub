@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -29,6 +28,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
       description: initialData?.description || "",
       image: initialData?.image || "",
       isActive: initialData?.isActive ?? true,
+      expiryDate: initialData?.expiryDate || "",
+      stock: initialData?.stock || 0,
     },
   });
 
@@ -47,7 +48,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Product Image */}
+          {/* Image Upload Section */}
           <div className="md:col-span-2">
             <div className="flex flex-col items-center gap-4">
               <div className="h-40 w-40 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
@@ -168,6 +169,43 @@ const ProductForm: React.FC<ProductFormProps> = ({
             )}
           />
 
+          {/* Stock */}
+          <FormField
+            control={form.control}
+            name="stock"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Stock Quantity</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field}
+                    type="number"
+                    min="0"
+                    onChange={e => field.onChange(parseInt(e.target.value, 10))}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {/* Expiry Date */}
+          <FormField
+            control={form.control}
+            name="expiryDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Expiry Date</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field}
+                    type="date"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
           {/* Status */}
           <FormField
             control={form.control}
@@ -179,6 +217,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   <select 
                     {...field}
                     className="h-10 w-full rounded-md border border-input px-3 py-2"
+                    value={field.value ? "true" : "false"}
+                    onChange={e => field.onChange(e.target.value === "true")}
                   >
                     <option value="true">Active</option>
                     <option value="false">Inactive</option>

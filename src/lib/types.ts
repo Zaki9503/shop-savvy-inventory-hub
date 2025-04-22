@@ -36,6 +36,8 @@ export interface Product {
   description?: string;
   image?: string;
   isActive: boolean;
+  expiryDate?: string;
+  stock: number;
 }
 
 // Inventory Types
@@ -81,4 +83,3 @@ export interface Customer {
   customerType: SaleType;
   createdAt: string;
 }
-
