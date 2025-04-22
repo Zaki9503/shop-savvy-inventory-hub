@@ -267,7 +267,7 @@ const NewSaleForm: React.FC<NewSaleFormProps> = ({ onSaleComplete }) => {
             size="lg"
             onClick={handleCompleteSale}
           >
-            Complete Sale
+            {saleType === 'online' ? 'Proceed to Pay' : 'Complete Sale'}
           </Button>
         </CardFooter>
       )}

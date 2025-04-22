@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useData } from "@/lib/data-context";
 import { useAuth } from "@/lib/auth-context";
@@ -13,7 +12,7 @@ import SaleDetailsModal from "@/components/sales/SaleDetailsModal";
 import NewSaleForm from "@/components/sales/NewSaleForm";
 
 const SalesPage: React.FC = () => {
-  const { sales, shops, customers, getShop, getCustomer, products } = useData();
+  const { sales, shops, getShop, products } = useData();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<keyof Sale>("createdAt");
@@ -37,8 +36,6 @@ const SalesPage: React.FC = () => {
       (searchTerm === "" ||
         // Search by sale ID
         sale.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        // Search by customer name
-        (sale.customerId && getCustomer(sale.customerId)?.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
         // Search by shop name
         getShop(sale.shopId)?.name.toLowerCase().includes(searchTerm.toLowerCase())
       ) &&
@@ -155,7 +152,6 @@ const SalesPage: React.FC = () => {
                         )}
                       </div>
                     </TableHead>
-                    <TableHead>Customer</TableHead>
                     {!shopId && <TableHead>Shop</TableHead>}
                     <TableHead>Type</TableHead>
                     <TableHead
@@ -182,23 +178,12 @@ const SalesPage: React.FC = () => {
                     </TableRow>
                   ) : (
                     filteredSales.map((sale) => {
-                      const customer = sale.customerId ? getCustomer(sale.customerId) : null;
                       const shop = getShop(sale.shopId);
 
                       return (
                         <TableRow key={sale.id}>
                           <TableCell className="font-mono text-sm">{sale.id}</TableCell>
                           <TableCell>{formatDate(sale.createdAt)}</TableCell>
-                          <TableCell>
-                            {customer ? (
-                              <div>
-                                <p className="font-medium">{customer.name}</p>
-                                <p className="text-xs text-gray-500">{customer.phone || "No contact"}</p>
-                              </div>
-                            ) : (
-                              <span className="text-gray-500">Walk-in Customer</span>
-                            )}
-                          </TableCell>
                           {!shopId && (
                             <TableCell>
                               {shop?.name || "Unknown Shop"}

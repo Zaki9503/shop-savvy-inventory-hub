@@ -4,7 +4,8 @@ import { Sale } from '@/lib/types';
 import { useData } from '@/lib/data-context';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { receipt } from 'lucide-react';
+import { Receipt, Printer } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface SaleBillProps {
   sale: Sale;
@@ -14,19 +15,31 @@ const SaleBill: React.FC<SaleBillProps> = ({ sale }) => {
   const { getShop, getProduct } = useData();
   const shop = getShop(sale.shopId);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   if (!shop) return null;
 
   return (
     <Card className="p-6 max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold">{shop.name}</h2>
-        <p className="text-gray-600">Shop No: {shop.shopNo}</p>
-        <p className="text-gray-600">{shop.address}</p>
-        {shop.phone && <p className="text-gray-600">Phone: {shop.phone}</p>}
+      <div className="flex justify-between items-start mb-6">
+        <div className="text-center flex-1">
+          <h2 className="text-2xl font-bold">{shop.name}</h2>
+          <p className="text-gray-600">Shop No: {shop.shopNo}</p>
+          <p className="text-gray-600">{shop.address}</p>
+          {shop.phone && <p className="text-gray-600">Phone: {shop.phone}</p>}
+        </div>
+        <Button 
+          variant="outline" 
+          className="print:hidden"
+          onClick={handlePrint}
+        >
+          <Printer className="mr-2 h-4 w-4" />
+          Print
+        </Button>
       </div>
 
-      {/* Bill Details */}
       <div className="flex justify-between mb-4 text-sm">
         <div>
           <p>Bill No: {sale.id}</p>
@@ -37,7 +50,6 @@ const SaleBill: React.FC<SaleBillProps> = ({ sale }) => {
         </div>
       </div>
 
-      {/* Items Table */}
       <Table>
         <TableHeader>
           <TableRow>
@@ -67,7 +79,6 @@ const SaleBill: React.FC<SaleBillProps> = ({ sale }) => {
         </TableBody>
       </Table>
 
-      {/* Totals */}
       <div className="mt-4 flex flex-col items-end space-y-1">
         <p className="text-lg font-bold">
           Total Amount: ${sale.total.toFixed(2)}
@@ -80,7 +91,6 @@ const SaleBill: React.FC<SaleBillProps> = ({ sale }) => {
         )}
       </div>
 
-      {/* Footer */}
       <div className="mt-6 text-center text-sm text-gray-500">
         <p>Thank you for your business!</p>
       </div>

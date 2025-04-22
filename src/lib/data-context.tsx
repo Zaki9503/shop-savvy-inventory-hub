@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import { Shop, Product, ShopInventory, Sale, Customer } from "./types";
+import { Shop, Product, ShopInventory, Sale, Customer, SaleType } from "./types";
 
 // Mock data for development
 const MOCK_SHOPS: Shop[] = [
@@ -152,16 +152,13 @@ const MOCK_CUSTOMERS: Customer[] = [
 // Generate some sales for each shop
 const generateMockSales = (): Sale[] => {
   const sales: Sale[] = [];
-  const saleTypes: ("cash" | "online")[] = ["cash", "online"];
+  const saleTypes: SaleType[] = ["cash", "online"];
   const today = new Date();
   
   // Generate 15 random sales across different shops
   for (let i = 1; i <= 15; i++) {
     const shopId = `shop${Math.floor(Math.random() * 3) + 1}`;
     const saleType = saleTypes[Math.floor(Math.random() * 2)];
-    const customerId = saleType !== "cash" 
-      ? `cust${Math.floor(Math.random() * 2) + 2}` 
-      : undefined;
     
     // Generate 1-3 random items for this sale
     const numItems = Math.floor(Math.random() * 3) + 1;
@@ -172,7 +169,6 @@ const generateMockSales = (): Sale[] => {
       const productId = `prod${Math.floor(Math.random() * 5) + 1}`;
       const quantity = Math.floor(Math.random() * 5) + 1;
       
-      // Find product price
       const product = MOCK_PRODUCTS.find(p => p.id === productId);
       if (product) {
         const price = product.price;
@@ -188,15 +184,6 @@ const generateMockSales = (): Sale[] => {
       }
     }
     
-    // For credit and lease, set partial payment
-    let paid = total;
-    let balance = 0;
-    
-    if (saleType === "credit" || saleType === "lease") {
-      paid = Math.round((total * (Math.random() * 0.5 + 0.1)) * 100) / 100; // 10-60% paid
-      balance = total - paid;
-    }
-    
     // Random date within the last 30 days
     const saleDate = new Date(today);
     saleDate.setDate(today.getDate() - Math.floor(Math.random() * 30));
@@ -204,13 +191,12 @@ const generateMockSales = (): Sale[] => {
     sales.push({
       id: `sale${i}`,
       shopId,
-      customerId,
       saleType,
       items,
       total,
-      paid,
-      balance,
-      createdBy: Math.random() > 0.5 ? "2" : "3", // manager or staff
+      paid: total,
+      balance: 0,
+      createdBy: Math.random() > 0.5 ? "2" : "3",
       createdAt: saleDate.toISOString(),
       status: "completed"
     });
