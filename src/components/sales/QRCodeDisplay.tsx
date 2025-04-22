@@ -8,8 +8,8 @@ interface QRCodeDisplayProps {
 }
 
 const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({ value, size = 200 }) => {
-  // For a real QR code, you would use a library like qrcode.react
-  // This is a placeholder that shows the lucide QR code icon
+  // This is a simplified placeholder for a real QR code implementation
+  // In a production app, you'd use a library like qrcode.react
   return (
     <div className="flex flex-col items-center justify-center">
       <div 

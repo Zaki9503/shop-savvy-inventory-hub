@@ -51,7 +51,7 @@ export interface ShopInventory {
 }
 
 // Sales Types
-export type SaleType = 'cash' | 'online';
+export type SaleType = 'cash' | 'online' | 'credit' | 'lease';
 
 export interface Sale {
   id: string;

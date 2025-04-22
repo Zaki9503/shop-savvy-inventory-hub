@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useData } from "@/lib/data-context";
 import { useAuth } from "@/lib/auth-context";
@@ -9,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ShoppingBag, Plus, Minus, Search, QrCode, CreditCard, Cash } from "lucide-react";
+import { ShoppingBag, Plus, Minus, Search, QrCode, CreditCard, Banknote } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface NewSaleFormProps {
@@ -253,7 +252,7 @@ const NewSaleForm: React.FC<NewSaleFormProps> = ({ onSaleComplete }) => {
           >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="cash" className="flex items-center gap-2">
-                <Cash className="h-4 w-4" />
+                <Banknote className="h-4 w-4" />
                 Cash Payment
               </TabsTrigger>
               <TabsTrigger value="online" className="flex items-center gap-2">
