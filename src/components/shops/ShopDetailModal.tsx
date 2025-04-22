@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -32,8 +31,7 @@ const ShopDetailModal: React.FC<ShopDetailModalProps> = ({ open, onClose, shop, 
           {manager ? (
             <div className="space-y-1">
               <div>Name: {manager.name}</div>
-              <div>Email: {manager.email}</div>
-              <div>Phone: {manager.phone || "-"}</div>
+              <div>Contact: {manager.phone || "-"}</div>
               <div>Address: {manager.address || "-"}</div>
             </div>
           ) : (
