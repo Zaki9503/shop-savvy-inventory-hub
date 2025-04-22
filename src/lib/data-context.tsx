@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import { Shop, Product, ShopInventory, Sale, Customer, SaleType } from "./types";
+import { Shop, Product, ShopInventory, Sale, SaleType, SaleItem } from "./types";
 
 // Mock data for development
 const MOCK_SHOPS: Shop[] = [
@@ -124,36 +124,6 @@ const MOCK_INVENTORY: ShopInventory[] = [
   { shopId: "shop3", productId: "prod5", quantity: 10, minStockLevel: 5, lastUpdated: new Date().toISOString() },
 ];
 
-const MOCK_CUSTOMERS: Customer[] = [
-  {
-    id: "cust1",
-    name: "John Smith",
-    email: "john.smith@example.com",
-    phone: "555-111-2222",
-    address: "123 Maple St, Anytown",
-    customerType: "cash",
-    createdAt: new Date(2023, 1, 15).toISOString(),
-  },
-  {
-    id: "cust2",
-    name: "Sarah Johnson",
-    email: "sarah.j@example.com",
-    phone: "555-333-4444",
-    address: "456 Oak Ave, Anytown",
-    customerType: "credit",
-    createdAt: new Date(2023, 2, 10).toISOString(),
-  },
-  {
-    id: "cust3",
-    name: "Michael Davis",
-    email: "michael.d@example.com",
-    phone: "555-555-6666",
-    address: "789 Pine Rd, Anytown",
-    customerType: "lease",
-    createdAt: new Date(2023, 3, 5).toISOString(),
-  },
-];
-
 // Generate some sales for each shop
 const generateMockSales = (): Sale[] => {
   const sales: Sale[] = [];
@@ -218,7 +188,6 @@ interface DataContextType {
   products: Product[];
   inventory: ShopInventory[];
   sales: Sale[];
-  customers: Customer[];
   
   // Shop operations
   addShop: (shop: Omit<Shop, "id" | "createdAt">) => Shop;
@@ -241,12 +210,6 @@ interface DataContextType {
   addSale: (sale: Omit<Sale, "id" | "createdAt">) => Sale;
   getSalesByShop: (shopId: string) => Sale[];
   getSalesByType: (type: SaleType) => Sale[];
-  
-  // Customer operations
-  addCustomer: (customer: Omit<Customer, "id" | "createdAt">) => Customer;
-  updateCustomer: (id: string, data: Partial<Customer>) => Customer | null;
-  deleteCustomer: (id: string) => boolean;
-  getCustomer: (id: string) => Customer | undefined;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -275,7 +238,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
   const [inventory, setInventory] = useState<ShopInventory[]>(MOCK_INVENTORY);
   const [sales, setSales] = useState<Sale[]>(MOCK_SALES);
-  const [customers, setCustomers] = useState<Customer[]>(MOCK_CUSTOMERS);
 
   // Shop operations
   const addShop = (shopData: Omit<Shop, "id" | "createdAt">) => {
@@ -389,19 +351,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getProductInventory = (productId: string) => 
     inventory.filter(item => item.productId === productId);
 
-    // Update product stock when a sale is made
-    const updateProductStock = (shopId: string, items: SaleItem[]) => {
-      items.forEach(item => {
-        const product = products.find(p => p.id === item.productId);
-        if (product) {
-          const updatedProduct = {
-            ...product,
-            stock: Math.max(0, product.stock - item.quantity)
-          };
-          updateProduct(product.id, updatedProduct);
-        }
-      });
-    };
+  // Update product stock when a sale is made
+  const updateProductStock = (shopId: string, items: SaleItem[]) => {
+    items.forEach(item => {
+      const product = products.find(p => p.id === item.productId);
+      if (product) {
+        const updatedProduct = {
+          ...product,
+          stock: Math.max(0, product.stock - item.quantity)
+        };
+        updateProduct(product.id, updatedProduct);
+      }
+    });
+  };
 
   // Sales operations
   const addSale = (saleData: Omit<Sale, "id" | "createdAt">) => {
@@ -424,43 +386,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getSalesByType = (type: SaleType) => 
     sales.filter(sale => sale.saleType === type);
 
-  const getSalesByCustomer = (customerId: string) => 
-    sales.filter(sale => sale.customerId === customerId);
-
-  // Customer operations
-  const addCustomer = (customerData: Omit<Customer, "id" | "createdAt">) => {
-    const newCustomer: Customer = {
-      ...customerData,
-      id: `cust${customers.length + 1}`,
-      createdAt: new Date().toISOString(),
-    };
-    setCustomers([...customers, newCustomer]);
-    return newCustomer;
-  };
-
-  const updateCustomer = (id: string, data: Partial<Customer>) => {
-    const index = customers.findIndex(customer => customer.id === id);
-    if (index === -1) return null;
-
-    const updatedCustomer = { ...customers[index], ...data };
-    const updatedCustomers = [...customers];
-    updatedCustomers[index] = updatedCustomer;
-    setCustomers(updatedCustomers);
-    return updatedCustomer;
-  };
-
-  const deleteCustomer = (id: string) => {
-    const index = customers.findIndex(customer => customer.id === id);
-    if (index === -1) return false;
-
-    const updatedCustomers = [...customers];
-    updatedCustomers.splice(index, 1);
-    setCustomers(updatedCustomers);
-    return true;
-  };
-
-  const getCustomer = (id: string) => customers.find(customer => customer.id === id);
-
   return (
     <DataContext.Provider
       value={{
@@ -468,7 +393,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         products,
         inventory,
         sales,
-        customers,
         addShop,
         updateShop,
         deleteShop,
@@ -483,11 +407,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addSale,
         getSalesByShop,
         getSalesByType,
-        getSalesByCustomer,
-        addCustomer,
-        updateCustomer,
-        deleteCustomer,
-        getCustomer,
       }}
     >
       {children}
