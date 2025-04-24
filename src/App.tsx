@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,7 @@ import SalesPage from "@/pages/SalesPage";
 import NotFound from "./pages/NotFound";
 import ShopList from "@/components/shops/ShopList"
 import AdminProfilePage from "@/pages/AdminProfilePage";
+import AnalyticsPage from "@/pages/AnalyticsPage";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +33,7 @@ const App = () => (
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/sales" element={<SalesPage />} />
                 <Route path="/admin-profile" element={<AdminProfilePage />} />
+                <Route path="/analytics" element={<AnalyticsPage />} />
                 {/* These routes will be implemented later */}
                 {/* Shops Section */}
                 <Route path="/shops" element={<ShopList />} />
