@@ -8,7 +8,8 @@ import {
   Store, 
   Users, 
   LogOut,
-  User
+  User,
+  Bell
 } from "lucide-react";
 import {
   Sidebar,
@@ -120,15 +121,15 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ onLogout }) => {
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <NavLink 
-                to="/customers" 
+                to="/analytics" 
                 className={({ isActive }) => 
                   `flex items-center gap-3 px-4 py-3 hover:bg-sidebar-accent rounded-md transition-colors ${
                     isActive ? "bg-sidebar-accent text-white" : "text-sidebar-foreground"
                   }`
                 }
               >
-                <Users className="h-5 w-5" />
-                <span>Customers</span>
+                <Bell className="h-5 w-5" />
+                <span>Analytics</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
