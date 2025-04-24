@@ -3,7 +3,7 @@ import React from "react";
 import { useData } from "@/lib/data-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { BellAlert } from "lucide-react";
+import { Bell } from "lucide-react";
 
 const LowStockWarnings: React.FC = () => {
   const { products } = useData();
@@ -13,7 +13,7 @@ const LowStockWarnings: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <BellAlert className="h-5 w-5" />
+          <Bell className="h-5 w-5" />
           Low Stock Warnings
         </CardTitle>
       </CardHeader>
