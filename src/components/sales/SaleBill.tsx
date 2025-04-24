@@ -70,9 +70,9 @@ const SaleBill: React.FC<SaleBillProps> = ({ sale }) => {
                     <div className="text-xs text-gray-500">{product?.sku}</div>
                   </div>
                 </TableCell>
-                <TableCell>${item.price.toFixed(2)}</TableCell>
+                <TableCell>₹{item.price.toFixed(2)}</TableCell>
                 <TableCell>{item.quantity}</TableCell>
-                <TableCell className="text-right">${item.total.toFixed(2)}</TableCell>
+                <TableCell className="text-right">₹{item.total.toFixed(2)}</TableCell>
               </TableRow>
             );
           })}
@@ -81,12 +81,12 @@ const SaleBill: React.FC<SaleBillProps> = ({ sale }) => {
 
       <div className="mt-4 flex flex-col items-end space-y-1">
         <p className="text-lg font-bold">
-          Total Amount: ${sale.total.toFixed(2)}
+          Total Amount: ₹{sale.total.toFixed(2)}
         </p>
         {sale.balance > 0 && (
           <>
-            <p>Paid: ${sale.paid.toFixed(2)}</p>
-            <p className="text-red-500">Balance: ${sale.balance.toFixed(2)}</p>
+            <p>Paid: ₹{sale.paid.toFixed(2)}</p>
+            <p className="text-red-500">Balance: ₹{sale.balance.toFixed(2)}</p>
           </>
         )}
       </div>

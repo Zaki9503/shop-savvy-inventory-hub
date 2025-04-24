@@ -6,10 +6,10 @@ import {
   Package, 
   ShoppingBag, 
   Store, 
-  Users, 
   LogOut,
   User,
-  Bell
+  Bell,
+  IndianRupee
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,7 +34,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ onLogout }) => {
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center gap-2 pl-4 py-4">
-          <ShoppingBag className="h-7 w-7 text-white" />
+          <IndianRupee className="h-7 w-7 text-white" />
           <h1 className="text-xl font-bold text-white">ShopSavvy</h1>
         </div>
       </SidebarHeader>
@@ -133,23 +133,6 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ onLogout }) => {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          {isAdmin && (
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <NavLink 
-                  to="/users" 
-                  className={({ isActive }) => 
-                    `flex items-center gap-3 px-4 py-3 hover:bg-sidebar-accent rounded-md transition-colors ${
-                      isActive ? "bg-sidebar-accent text-white" : "text-sidebar-foreground"
-                    }`
-                  }
-                >
-                  <User className="h-5 w-5" />
-                  <span>Users</span>
-                </NavLink>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
