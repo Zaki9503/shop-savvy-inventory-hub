@@ -36,7 +36,6 @@ const App = () => (
                 <Route path="/admin-profile" element={<AdminProfilePage />} />
                 <Route path="/analytics" element={<AnalyticsPage />} />
                 <Route path="/shops" element={<ShopList />} />
-                <Route path="/users" element={<div className="p-8">Users page coming soon</div>} />
               </Route>
               
               <Route path="*" element={<NotFound />} />

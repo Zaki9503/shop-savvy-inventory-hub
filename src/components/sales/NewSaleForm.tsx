@@ -188,7 +188,7 @@ const NewSaleForm: React.FC<NewSaleFormProps> = ({ onSaleComplete }) => {
                             <span className="text-xs text-gray-500">{product?.sku}</span>
                           </div>
                         </TableCell>
-                        <TableCell>${item.price.toFixed(2)}</TableCell>
+                        <TableCell>₹{item.price.toFixed(2)}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Button
@@ -210,7 +210,7 @@ const NewSaleForm: React.FC<NewSaleFormProps> = ({ onSaleComplete }) => {
                             </Button>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">${item.total.toFixed(2)}</TableCell>
+                        <TableCell className="font-medium">₹{item.total.toFixed(2)}</TableCell>
                         <TableCell>
                           <Button
                             variant="ghost"
@@ -242,7 +242,7 @@ const NewSaleForm: React.FC<NewSaleFormProps> = ({ onSaleComplete }) => {
         <CardFooter className="flex flex-col space-y-4">
           <div className="flex items-center justify-between w-full">
             <span className="text-lg font-semibold">Total Amount:</span>
-            <span className="text-2xl font-bold">${totalAmount.toFixed(2)}</span>
+            <span className="text-2xl font-bold">₹{totalAmount.toFixed(2)}</span>
           </div>
           
           <Tabs
@@ -281,7 +281,7 @@ const NewSaleForm: React.FC<NewSaleFormProps> = ({ onSaleComplete }) => {
           <div className="flex flex-col items-center justify-center p-6 space-y-4">
             <QRCodeDisplay size={250} />
             <p className="text-center text-sm">
-              Amount: <span className="font-bold">${totalAmount.toFixed(2)}</span>
+              Amount: <span className="font-bold">₹{totalAmount.toFixed(2)}</span>
             </p>
             <Button onClick={handlePaymentConfirmed}>
               Payment Confirmed
