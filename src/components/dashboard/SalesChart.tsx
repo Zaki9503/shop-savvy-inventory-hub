@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import {
   Area,
@@ -87,7 +86,7 @@ const SalesChart = () => {
                 <XAxis dataKey="day" />
                 <YAxis />
                 <Tooltip 
-                  formatter={(value) => `$${Number(value).toFixed(2)}`}
+                  formatter={(value) => `₹${Number(value).toFixed(2)}`}
                   labelFormatter={(label) => `Day ${label}`}
                 />
                 <Area
@@ -124,7 +123,7 @@ const SalesChart = () => {
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(value) => `$${Number(value).toFixed(2)}`}
+                  formatter={(value) => `₹${Number(value).toFixed(2)}`}
                 />
                 <Legend />
               </PieChart>

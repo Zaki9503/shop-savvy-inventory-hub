@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Dialog,
@@ -12,28 +11,28 @@ import ProductForm from "./ProductForm";
 interface ProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialData?: Product;
+  product?: Product;
   onSubmit: (data: Partial<Product>) => void;
-  mode: "add" | "edit";
 }
 
 const ProductDialog: React.FC<ProductDialogProps> = ({
   open,
   onOpenChange,
-  initialData,
+  product,
   onSubmit,
-  mode,
 }) => {
+  const isEditMode = !!product;
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            {mode === "add" ? "Add New Product" : "Edit Product"}
+            {isEditMode ? "Edit Product" : "Add New Product"}
           </DialogTitle>
         </DialogHeader>
         <ProductForm
-          initialData={initialData}
+          initialData={product}
           onSubmit={onSubmit}
           onCancel={() => onOpenChange(false)}
         />

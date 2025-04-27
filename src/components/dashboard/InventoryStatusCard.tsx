@@ -1,52 +1,76 @@
-
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Package } from "lucide-react";
+import { Store } from "lucide-react";
 
 interface InventoryStatusCardProps {
+  shopId?: string;
   shopName: string;
   lowStockCount: number;
   outOfStockCount: number;
-  className?: string;
+  onShopClick?: (shopId: string) => void;
 }
 
-export const InventoryStatusCard: React.FC<InventoryStatusCardProps> = ({
+const InventoryStatusCard: React.FC<InventoryStatusCardProps> = ({
+  shopId,
   shopName,
   lowStockCount,
   outOfStockCount,
-  className,
+  onShopClick
 }) => {
+  const hasStockIssues = lowStockCount > 0 || outOfStockCount > 0;
+  
   return (
-    <div className={cn(
-      "bg-white rounded-xl shadow-sm p-6", 
-      className
-    )}>
-      <div className="flex items-center justify-between">
-        <h3 className="font-medium text-gray-700">{shopName}</h3>
-        <div className="bg-blue-100 text-blue-800 p-2 rounded-md">
-          <Package className="h-4 w-4" />
+    <div 
+      className={cn(
+        "bg-white rounded-lg border p-4 shadow-sm",
+        shopId && onShopClick && "cursor-pointer hover:shadow-md transition-shadow"
+      )}
+      onClick={() => {
+        if (shopId && onShopClick) {
+          onShopClick(shopId);
+        }
+      }}
+    >
+      <div className="flex items-center mb-4">
+        <div className="p-2 rounded-full bg-primary/10 mr-3">
+          <Store className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h3 className="font-medium">{shopName}</h3>
+          <p className="text-xs text-muted-foreground">
+            Inventory Status
+          </p>
         </div>
       </div>
       
-      <div className="mt-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">Low Stock Items</span>
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-sm">Low Stock Items</span>
           <span className={cn(
-            "text-sm font-medium px-2 py-1 rounded-full",
-            lowStockCount > 0 ? "bg-amber-100 text-amber-800" : "bg-green-100 text-green-800"
+            "font-medium",
+            lowStockCount > 0 && "text-amber-600"
           )}>
             {lowStockCount}
           </span>
         </div>
         
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">Out of Stock</span>
+        <div className="flex justify-between items-center">
+          <span className="text-sm">Out of Stock Items</span>
           <span className={cn(
-            "text-sm font-medium px-2 py-1 rounded-full",
-            outOfStockCount > 0 ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"
+            "font-medium",
+            outOfStockCount > 0 && "text-red-600"
           )}>
             {outOfStockCount}
           </span>
+        </div>
+        
+        <div className="text-xs mt-2 text-right text-muted-foreground">
+          {hasStockIssues 
+            ? lowStockCount + outOfStockCount === 1 
+              ? "1 item needs attention" 
+              : `${lowStockCount + outOfStockCount} items need attention`
+            : "All items in stock"
+          }
         </div>
       </div>
     </div>

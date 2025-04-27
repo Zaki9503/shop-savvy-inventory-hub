@@ -1,12 +1,24 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Shop, Product, ShopInventory, Sale, SaleType, SaleItem } from "./types";
+import {
+  loadShops,
+  loadProducts,
+  loadInventory,
+  loadSales,
+  loadActiveShop,
+  saveShops,
+  saveProducts,
+  saveInventory,
+  saveSales,
+  saveActiveShop
+} from "./storage-utils";
 
 // Mock data for development
 const MOCK_SHOPS: Shop[] = [
   {
     id: "shop1",
     name: "Downtown Grocery",
-    shopNo: "DT001",
+    storeNumber: "DT001",
     address: "123 Main St, Downtown",
     managerId: "2",
     phone: "555-123-4567",
@@ -16,7 +28,7 @@ const MOCK_SHOPS: Shop[] = [
   {
     id: "shop2",
     name: "Uptown Market",
-    shopNo: "UT002",
+    storeNumber: "UT002",
     address: "456 High St, Uptown",
     phone: "555-987-6543",
     email: "uptown@shopsavvy.com",
@@ -25,7 +37,7 @@ const MOCK_SHOPS: Shop[] = [
   {
     id: "shop3",
     name: "Westside Mart",
-    shopNo: "WS003",
+    storeNumber: "WS003",
     address: "789 West Ave, Westside",
     phone: "555-456-7890",
     email: "westside@shopsavvy.com",
@@ -182,6 +194,13 @@ const generateMockSales = (): Sale[] => {
 
 const MOCK_SALES = generateMockSales();
 
+// Improved return types for shop and product operations
+interface ShopOperationResult<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
 // Data Context Type
 interface DataContextType {
   shops: Shop[];
@@ -189,22 +208,25 @@ interface DataContextType {
   inventory: ShopInventory[];
   sales: Sale[];
   
-  // Shop operations
-  addShop: (shop: Omit<Shop, "id" | "createdAt">) => Shop;
-  updateShop: (id: string, data: Partial<Shop>) => Shop | null;
-  deleteShop: (id: string) => boolean;
+  // Shop operations with improved return types
+  addShop: (shop: Omit<Shop, "id" | "createdAt">) => ShopOperationResult<Shop>;
+  updateShop: (id: string, data: Partial<Shop>) => ShopOperationResult<Shop>;
+  deleteShop: (id: string) => ShopOperationResult<boolean>;
   getShop: (id: string) => Shop | undefined;
   
-  // Product operations
-  addProduct: (product: Omit<Product, "id">) => Product;
-  updateProduct: (id: string, data: Partial<Product>) => Product | null;
-  deleteProduct: (id: string) => boolean;
+  // Product operations with improved return types
+  addProduct: (product: Omit<Product, "id">) => ShopOperationResult<Product>;
+  updateProduct: (id: string, data: Partial<Product>) => ShopOperationResult<Product>;
+  deleteProduct: (id: string) => ShopOperationResult<boolean>;
   getProduct: (id: string) => Product | undefined;
+  getShopProducts: (shopId: string) => Product[];
   
   // Inventory operations
   updateInventory: (shopId: string, productId: string, quantity: number) => ShopInventory | null;
   getShopInventory: (shopId: string) => ShopInventory[];
   getProductInventory: (productId: string) => ShopInventory[];
+  removeProductFromShop: (shopId: string, productId: string) => boolean;
+  isProductInAnyShop: (productId: string) => boolean;
   
   // Sales operations
   addSale: (sale: Omit<Sale, "id" | "createdAt">) => Sale;
@@ -237,42 +259,179 @@ const generateSaleId = (sales: Sale[]): string => {
 };
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [shops, setShops] = useState<Shop[]>(MOCK_SHOPS);
-  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
-  const [inventory, setInventory] = useState<ShopInventory[]>(MOCK_INVENTORY);
-  const [sales, setSales] = useState<Sale[]>(MOCK_SALES);
-  const [activeShopId, setActiveShopId] = useState<string | null>(null);
+  // Initialize with data from localStorage or fallback to mock data if empty
+  const [shops, setShops] = useState<Shop[]>(() => {
+    const storedShops = loadShops();
+    return storedShops.length > 0 ? storedShops : MOCK_SHOPS;
+  });
+  
+  const [products, setProducts] = useState<Product[]>(() => {
+    const storedProducts = loadProducts();
+    return storedProducts.length > 0 ? storedProducts : MOCK_PRODUCTS;
+  });
+  
+  const [inventory, setInventory] = useState<ShopInventory[]>(() => {
+    const storedInventory = loadInventory();
+    return storedInventory.length > 0 ? storedInventory : MOCK_INVENTORY;
+  });
+  
+  const [sales, setSales] = useState<Sale[]>(() => {
+    const storedSales = loadSales();
+    return storedSales.length > 0 ? storedSales : MOCK_SALES;
+  });
+  
+  const [activeShopId, setActiveShopId] = useState<string | null>(() => {
+    return loadActiveShop();
+  });
+
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    saveShops(shops);
+  }, [shops]);
+  
+  useEffect(() => {
+    saveProducts(products);
+  }, [products]);
+  
+  useEffect(() => {
+    saveInventory(inventory);
+  }, [inventory]);
+  
+  useEffect(() => {
+    saveSales(sales);
+  }, [sales]);
+  
+  useEffect(() => {
+    saveActiveShop(activeShopId);
+  }, [activeShopId]);
 
   // Shop operations
   const addShop = (shopData: Omit<Shop, "id" | "createdAt">) => {
+    // Check if a shop with the same name already exists
+    const shopWithSameName = shops.find(
+      shop => shop.name.toLowerCase() === shopData.name.toLowerCase()
+    );
+    
+    if (shopWithSameName) {
+      console.error("A shop with this name already exists");
+      return { success: false, error: "A shop with this name already exists" };
+    }
+
+    // Check if a shop with the same store number already exists
+    const shopWithSameNumber = shops.find(
+      shop => shop.storeNumber === shopData.storeNumber
+    );
+    
+    if (shopWithSameNumber) {
+      console.error("A shop with this store number already exists");
+      return { success: false, error: "A shop with this store number already exists" };
+    }
+
     const newShop: Shop = {
       ...shopData,
       id: `shop${shops.length + 1}`,
       createdAt: new Date().toISOString(),
     };
-    setShops([...shops, newShop]);
-    return newShop;
+    
+    const updatedShops = [...shops, newShop];
+    setShops(updatedShops);
+    
+    // Immediately save to localStorage
+    saveShops(updatedShops);
+    
+    return { success: true, data: newShop };
   };
 
   const updateShop = (id: string, data: Partial<Shop>) => {
     const index = shops.findIndex(shop => shop.id === id);
-    if (index === -1) return null;
+    if (index === -1) return { success: false, error: "Shop not found" };
+
+    // If name is being updated, check for duplicates
+    if (data.name) {
+      const shopWithSameName = shops.find(
+        shop => shop.id !== id && shop.name.toLowerCase() === data.name!.toLowerCase()
+      );
+      
+      if (shopWithSameName) {
+        console.error("A shop with this name already exists");
+        return { success: false, error: "A shop with this name already exists" };
+      }
+    }
+
+    // If store number is being updated, check for duplicates
+    if (data.storeNumber) {
+      const shopWithSameNumber = shops.find(
+        shop => shop.id !== id && shop.storeNumber === data.storeNumber
+      );
+      
+      if (shopWithSameNumber) {
+        console.error("A shop with this store number already exists");
+        return { success: false, error: "A shop with this store number already exists" };
+      }
+    }
 
     const updatedShop = { ...shops[index], ...data };
     const updatedShops = [...shops];
     updatedShops[index] = updatedShop;
     setShops(updatedShops);
-    return updatedShop;
+    
+    // Immediately save to localStorage
+    saveShops(updatedShops);
+    
+    return { success: true, data: updatedShop };
   };
 
   const deleteShop = (id: string) => {
     const index = shops.findIndex(shop => shop.id === id);
-    if (index === -1) return false;
+    if (index === -1) return { success: false, error: "Shop not found" };
 
+    // Check if there are any sales associated with this shop
+    if (sales.some(sale => sale.shopId === id)) {
+      console.error("Cannot delete shop with existing sales records");
+      return { success: false, error: "Cannot delete shop with existing sales records" };
+    }
+
+    // Get shop before removing it to access managerId
+    const shopToDelete = shops[index];
+    
+    // Remove shop from state
     const updatedShops = [...shops];
     updatedShops.splice(index, 1);
     setShops(updatedShops);
-    return true;
+    
+    // Save to localStorage
+    saveShops(updatedShops);
+    
+    // Handle inventory cleanup
+    const updatedInventory = inventory.filter(item => item.shopId !== id);
+    if (updatedInventory.length !== inventory.length) {
+      setInventory(updatedInventory);
+      saveInventory(updatedInventory);
+    }
+    
+    // If this shop was the active shop, clear the active shop
+    if (activeShopId === id) {
+      setActiveShopId(null);
+      saveActiveShop(null);
+    }
+    
+    // Clean up users associated with this shop
+    try {
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const updatedUsers = users.filter((user: any) => user.shopId !== id);
+      
+      // If we have a specific managerId, ensure we remove their profile data too
+      if (shopToDelete.managerId) {
+        localStorage.removeItem(`profile_${shopToDelete.managerId}`);
+      }
+      
+      localStorage.setItem('users', JSON.stringify(updatedUsers));
+    } catch (error) {
+      console.error("Error cleaning up user data:", error);
+      // Don't fail the deletion if user cleanup fails
+    }
+
+    return { success: true, data: true };
   };
 
   const getShop = (id: string) => shops.find(shop => shop.id === id);
@@ -283,29 +442,63 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...productData,
       id: `prod${products.length + 1}`,
     };
-    setProducts([...products, newProduct]);
-    return newProduct;
+    
+    const updatedProducts = [...products, newProduct];
+    setProducts(updatedProducts);
+    
+    // Immediately save to localStorage
+    saveProducts(updatedProducts);
+    
+    return { success: true, data: newProduct };
   };
 
   const updateProduct = (id: string, data: Partial<Product>) => {
     const index = products.findIndex(product => product.id === id);
-    if (index === -1) return null;
+    if (index === -1) return { success: false, error: "Product not found" };
 
     const updatedProduct = { ...products[index], ...data };
     const updatedProducts = [...products];
     updatedProducts[index] = updatedProduct;
     setProducts(updatedProducts);
-    return updatedProduct;
+    
+    // Immediately save to localStorage
+    saveProducts(updatedProducts);
+    
+    return { success: true, data: updatedProduct };
   };
 
   const deleteProduct = (id: string) => {
     const index = products.findIndex(product => product.id === id);
-    if (index === -1) return false;
+    if (index === -1) return { success: false, error: "Product not found" };
+
+    // Check if product is used in any shop's inventory
+    const isProductInUse = inventory.some(item => item.productId === id);
+    if (isProductInUse) {
+      // If product is in use, we should remove it from all shops' inventory first
+      const updatedInventory = inventory.filter(item => item.productId !== id);
+      setInventory(updatedInventory);
+      
+      // Save updated inventory to localStorage
+      saveInventory(updatedInventory);
+    }
+
+    // Check if product is referenced in any sales
+    const isProductInSales = sales.some(sale => 
+      sale.items.some(item => item.productId === id)
+    );
+
+    if (isProductInSales) {
+      console.warn("Product is referenced in sales history. Deleting anyway but sales records will be affected.");
+    }
 
     const updatedProducts = [...products];
     updatedProducts.splice(index, 1);
     setProducts(updatedProducts);
-    return true;
+    
+    // Immediately save to localStorage
+    saveProducts(updatedProducts);
+    
+    return { success: true, data: true };
   };
 
   const getProduct = (id: string) => products.find(product => product.id === id);
@@ -332,7 +525,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lastUpdated: new Date().toISOString(),
       };
 
-      setInventory([...inventory, newInventoryItem]);
+      const updatedInventory = [...inventory, newInventoryItem];
+      setInventory(updatedInventory);
+      
+      // Immediately save to localStorage
+      saveInventory(updatedInventory);
+      
       return newInventoryItem;
     } else {
       // Update existing inventory entry
@@ -345,6 +543,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const updatedInventory = [...inventory];
       updatedInventory[index] = updatedItem;
       setInventory(updatedInventory);
+      
+      // Immediately save to localStorage
+      saveInventory(updatedInventory);
+      
       return updatedItem;
     }
   };
@@ -364,7 +566,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ...product,
           stock: Math.max(0, product.stock - item.quantity)
         };
-        updateProduct(product.id, updatedProduct);
+        const result = updateProduct(product.id, updatedProduct);
+        if (!result.success) {
+          console.error(`Failed to update stock for product ${product.id}: ${result.error}`);
+        }
       }
     });
   };
@@ -380,7 +585,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Update product stock levels
     updateProductStock(newSale.shopId, newSale.items);
 
-    setSales([...sales, newSale]);
+    const updatedSales = [...sales, newSale];
+    setSales(updatedSales);
+    
+    // Save to localStorage
+    saveSales(updatedSales);
+    
     return newSale;
   };
 
@@ -392,6 +602,41 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setActiveShop = (shopId: string) => {
     setActiveShopId(shopId);
+    saveActiveShop(shopId);
+  };
+
+  const removeProductFromShop = (shopId: string, productId: string) => {
+    // Find the inventory entry for this shop and product
+    const index = inventory.findIndex(
+      item => item.shopId === shopId && item.productId === productId
+    );
+    
+    if (index === -1) return false; // Inventory item not found
+    
+    // Remove item from inventory
+    const updatedInventory = [...inventory];
+    updatedInventory.splice(index, 1);
+    setInventory(updatedInventory);
+    
+    // Save to localStorage
+    saveInventory(updatedInventory);
+    
+    return true;
+  };
+
+  const isProductInAnyShop = (productId: string) => {
+    return inventory.some(item => item.productId === productId);
+  };
+
+  const getShopProducts = (shopId: string) => {
+    // Get all inventory items for this shop
+    const shopInventory = inventory.filter(item => item.shopId === shopId);
+    
+    // Get the product IDs from the inventory
+    const productIds = shopInventory.map(item => item.productId);
+    
+    // Filter products to only include those in the shop's inventory
+    return products.filter(product => productIds.includes(product.id));
   };
 
   return (
@@ -417,6 +662,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addSale,
         getSalesByShop,
         getSalesByType,
+        removeProductFromShop,
+        isProductInAnyShop,
+        getShopProducts,
       }}
     >
       {children}

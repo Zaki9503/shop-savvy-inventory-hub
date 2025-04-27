@@ -26,22 +26,48 @@ const SalesPage: React.FC = () => {
   // New sale form state
   const [showNewSaleForm, setShowNewSaleForm] = useState(false);
 
-  // Filter by shop if user is not admin
-  const shopId = user?.shopId;
+  // Determine if user is admin or sub-admin
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
+  const isSubAdmin = user?.role === "sub_admin" || user?.role === "manager";
+  
+  // Get user's assigned shop
+  const userShopId = user?.shopId;
+  
+  // Get shop name for display
+  const getAssignedShopName = () => {
+    if (!userShopId) return "";
+    const shop = shops.find(s => s.id === userShopId);
+    return shop ? shop.name : "Unknown Shop";
+  };
+
+  // Filter sales based on user role and shop assignment
   const filteredSales = sales
-    .filter(sale =>
-      // Filter by shop
-      (!shopId || sale.shopId === shopId) &&
+    .filter(sale => {
+      // For sub-admin, only show sales from their shop
+      if (isSubAdmin && userShopId) {
+        if (sale.shopId !== userShopId) {
+          return false;
+        }
+      }
+      
       // Filter by search term
-      (searchTerm === "" ||
-        // Search by sale ID
-        sale.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        // Search by shop name
-        getShop(activeShopId || sale.shopId)?.name.toLowerCase().includes(searchTerm.toLowerCase())
-      ) &&
+      if (searchTerm !== "") {
+        const matchesSaleId = sale.id.toLowerCase().includes(searchTerm.toLowerCase());
+        const shopName = getShop(sale.shopId)?.name.toLowerCase() || "";
+        const matchesShopName = shopName.includes(searchTerm.toLowerCase());
+        
+        if (!matchesSaleId && !matchesShopName) {
+          return false;
+        }
+      }
+      
       // Filter by sale type
-      (filterType === "all" || sale.saleType === filterType)
-    )
+      if (filterType !== "all" && sale.saleType !== filterType) {
+        return false;
+      }
+      
+      return true;
+    })
     // Sort results
     .sort((a, b) => {
       if (sortField === "createdAt") {
@@ -86,7 +112,11 @@ const SalesPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Sales</h1>
-          <p className="text-gray-500">Manage and track your sales</p>
+          {isSubAdmin && userShopId ? (
+            <p className="text-gray-500">Managing sales for {getAssignedShopName()}</p>
+          ) : (
+            <p className="text-gray-500">Manage and track your sales across all shops</p>
+          )}
         </div>
 
         <Button 
@@ -125,7 +155,7 @@ const SalesPage: React.FC = () => {
                   <option value="online">Online</option>
                 </select>
 
-                {!shopId && (
+                {isAdmin && (
                   <select className="h-9 rounded-md border border-input px-3 py-1 text-sm">
                     <option value="">All Shops</option>
                     {shops.map(shop => (
@@ -152,7 +182,7 @@ const SalesPage: React.FC = () => {
                         )}
                       </div>
                     </TableHead>
-                    {!shopId && <TableHead>Shop</TableHead>}
+                    {isAdmin && <TableHead>Shop</TableHead>}
                     <TableHead>Type</TableHead>
                     <TableHead
                       className="cursor-pointer"
@@ -172,19 +202,19 @@ const SalesPage: React.FC = () => {
                 <TableBody>
                   {filteredSales.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={shopId ? 6 : 7} className="h-24 text-center">
+                      <TableCell colSpan={isAdmin ? 7 : 6} className="h-24 text-center">
                         No sales found.
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredSales.map((sale) => {
-                      const shop = activeShopId ? getShop(activeShopId) : getShop(sale.shopId);
+                      const shop = getShop(sale.shopId);
 
                       return (
                         <TableRow key={sale.id}>
                           <TableCell className="font-mono text-sm">{sale.id}</TableCell>
                           <TableCell>{formatDate(sale.createdAt)}</TableCell>
-                          {!shopId && (
+                          {isAdmin && (
                             <TableCell>
                               {shop?.name || "Unknown Shop"}
                             </TableCell>
@@ -203,9 +233,9 @@ const SalesPage: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col">
-                              <span className="font-medium">${sale.total.toFixed(2)}</span>
+                              <span className="font-medium">₹{sale.total.toFixed(2)}</span>
                               {sale.balance > 0 && (
-                                <span className="text-xs text-red-500">Due: ${sale.balance.toFixed(2)}</span>
+                                <span className="text-xs text-red-500">Due: ₹{sale.balance.toFixed(2)}</span>
                               )}
                             </div>
                           </TableCell>

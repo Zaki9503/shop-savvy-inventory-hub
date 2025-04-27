@@ -1,4 +1,3 @@
-
 // Authentication Types
 export type UserRole = 'admin' | 'manager' | 'staff';
 
@@ -18,9 +17,10 @@ export interface User {
 export interface Shop {
   id: string;
   name: string;
-  shopNo: string;
+  storeNumber: string;
   address: string;
   managerId?: string;
+  superAdminId?: string;
   phone?: string;
   email?: string;
   createdAt: string;

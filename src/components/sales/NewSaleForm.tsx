@@ -123,7 +123,7 @@ const NewSaleForm: React.FC<NewSaleFormProps> = ({ onSaleComplete }) => {
     
     toast({
       title: "Sale completed",
-      description: `Total amount: $${totalAmount.toFixed(2)}`,
+      description: `Total amount: ₹${totalAmount.toFixed(2)}`,
     });
     
     // Reset form

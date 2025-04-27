@@ -5,11 +5,11 @@ import {
   Home, 
   Package, 
   ShoppingBag, 
-  Store, 
   LogOut,
   User,
   Bell,
-  IndianRupee
+  IndianRupee,
+  Store
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,16 +26,21 @@ interface AppSidebarProps {
 }
 
 const AppSidebar: React.FC<AppSidebarProps> = ({ onLogout }) => {
-  const { hasPermission } = useAuth();
-  const isAdmin = hasPermission(["admin"]);
-  const isManager = hasPermission(["admin", "manager"]);
+  const { user, hasPermission } = useAuth();
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+  const isManager = hasPermission(["admin", "manager", "super_admin"]);
+
+  console.log("User role:", user?.role); // Add this line for debugging
 
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-2 pl-4 py-4">
-          <IndianRupee className="h-7 w-7 text-white" />
-          <h1 className="text-xl font-bold text-white">ShopSavvy</h1>
+        <div className="flex items-center gap-2 pl-4 py-6 border-b border-sidebar-accent/20">
+          <IndianRupee className="h-8 w-8 text-white" />
+          <div className="flex flex-col">
+            <h1 className="text-xl font-bold text-white">ShopSavvy</h1>
+            <span className="text-xs text-sidebar-foreground/70">Inventory Hub</span>
+          </div>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -71,6 +76,24 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ onLogout }) => {
             </SidebarMenuButton>
           </SidebarMenuItem>
           
+          {isAdmin && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <NavLink 
+                  to="/stores" 
+                  className={({ isActive }) => 
+                    `flex items-center gap-3 px-4 py-3 hover:bg-sidebar-accent rounded-md transition-colors ${
+                      isActive ? "bg-sidebar-accent text-white" : "text-sidebar-foreground"
+                    }`
+                  }
+                >
+                  <Store className="h-5 w-5" />
+                  <span>Manage Stores</span>
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+          
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <NavLink 
@@ -86,6 +109,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ onLogout }) => {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <NavLink 
@@ -101,23 +125,6 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ onLogout }) => {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          {isManager && (
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <NavLink 
-                  to="/shops" 
-                  className={({ isActive }) => 
-                    `flex items-center gap-3 px-4 py-3 hover:bg-sidebar-accent rounded-md transition-colors ${
-                      isActive ? "bg-sidebar-accent text-white" : "text-sidebar-foreground"
-                    }`
-                  }
-                >
-                  <Store className="h-5 w-5" />
-                  <span>Shops</span>
-                </NavLink>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <NavLink 
